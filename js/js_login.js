@@ -1,3 +1,18 @@
+const check_xss = (input) => {
+    // DOMPurify 라이브러리 로드 (CDN 사용)
+    const DOMPurify = window.DOMPurify;
+    // 입력 값을 DOMPurify로 sanitize
+    const sanitizedInput = DOMPurify.sanitize(input);
+    // Sanitized된 값과 원본 입력 값 비교
+   if (sanitizedInput !== input) {
+    // XSS 공격 가능성 발견 시 에러 처리
+   alert('XSS 공격 가능성이 있는 입력값을 발견했습니다.');
+    return false;
+    }
+    // Sanitized된 값 반환
+   return sanitizedInput;
+};
+
 const check_input = () => {
     const loginForm = document.getElementById('login_form');
     const loginBtn = document.getElementById('login_btn');
@@ -9,6 +24,11 @@ const check_input = () => {
 
     const emailValue = emailInput.value.trim(); //trim : 공백 제거 함수
     const passwordValue = passwordInput.value.trim();
+
+    const sanitizedPassword = check_xss(passwordInput);
+    // check_xss 함수로 비밀번호 Sanitize
+    const sanitizedEmail = check_xss(emailInput);
+    // check_xss 함수로 비밀번호 Sanitize
     
     if (emailValue === '') {
         alert('이메일을 입력하세요.');
@@ -43,6 +63,15 @@ const check_input = () => {
         if (!hasUpperCase || !hasLowerCase) {
     alert('패스워드는 대소문자를 1개이상 포함해야합니다.');
     return false;
+    }
+
+    if (!sanitizedEmail) {
+        // Sanitize된 비밀번호 사용
+       return false;
+        }
+        if (!sanitizedPassword) {
+        // Sanitize된 비밀번호 사용
+       return false;
     }
        
     console.log('이메일:', emailValue);
