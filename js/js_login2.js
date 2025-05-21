@@ -14,7 +14,8 @@ function init(){ // 로그인 폼에 쿠키에서 가져온 아이디 입력
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    init();
+    checkAuth(); //토큰 검증
+    init_logined(); //복호화
 });
 
 function init_logined(){
@@ -156,5 +157,5 @@ const check_input = () => {
     loginForm.submit();
 };
 
-document.getElementById("login_btn").addEventListener('click', check_input);
+document.getElementById("logout_btn").addEventListener('click', check_input);
    
