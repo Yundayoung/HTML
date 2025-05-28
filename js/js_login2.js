@@ -76,7 +76,7 @@ const check_input = () => {
     const emailInput= document.getElementById('typeEmailX');
     const passwordInput = document.getElementById('typePasswordX');
     
-    const c = '아이디, 패스워드를 체크합니다';
+    const c = '로그아웃 되었습니다';
     alert(c);
 
     const emailValue = emailInput.value.trim(); //trim : 공백 제거 함수
