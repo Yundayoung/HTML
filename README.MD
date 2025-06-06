@@ -213,7 +213,6 @@
         </html>
 
 </details>
-- login
 <details>
 <summary>login.html</summary>
 
@@ -872,7 +871,6 @@
         </html> 
 
 </details>
-- logout
 <details>
 <summary>logout.html</summary>
 
@@ -1003,7 +1001,6 @@
         </html>
 
 </details>
-- popup
 <details>
 <summary>popup.html</summary>
 
@@ -1032,7 +1029,6 @@
 
  
 </details>
-- css
 <details>
 <summary>login.css</summary>
 
@@ -1089,39 +1085,1256 @@
         #pagination .on {font-weight: bold; cursor: default;color:#777;}
 
 </details>
-- js
 <details>
 <summary>crypto.js</summary>
+
+        import { session_set, session_get, session_check } from './js_session.js';
+
+        function encodeByAES256(key, data){ //
+            const cipher = CryptoJS.AES.encrypt(data, CryptoJS.enc.Utf8.parse(key), {
+                iv: CryptoJS.enc.Utf8.parse(""), // IV 초기화 벡터
+                padding: CryptoJS.pad.Pkcs7, // 패딩
+                mode: CryptoJS.mode.CBC // 운영 모드
+            });
+            return cipher.toString();
+        }
+
+        function decodeByAES256(key, data){
+            const cipher = CryptoJS.AES.decrypt(data, CryptoJS.enc.Utf8.parse(key), {
+                iv: CryptoJS.enc.Utf8.parse(""),
+                padding: CryptoJS.pad.Pkcs7,
+                mode: CryptoJS.mode.CBC
+            });
+            return cipher.toString(CryptoJS.enc.Utf8);
+        }
+
+        export function encrypt_text(password){
+            const k = "key"; // 클라이언트 키
+            const rk = k.padEnd(32, " "); // AES256은 key 길이가 32
+            const b = password;
+            const eb = encodeByAES256(rk, b); // 실제 암호화
+            return eb;
+            console.log(eb);
+        }
+
+        export function decrypt_text(){
+            const k = "key"; // 서버의 키
+            const rk = k.padEnd(32, " "); // AES256은 key 길이가 32
+            const eb = session_get();
+            const b = decodeByAES256(rk, eb); // 실제 복호화
+            console.log(b); 
+        }
+        
 </details>
 <details>
 <summary>js_jwt_token.js</summary>
+
+        // JWT 비밀 키 (실제 운영 환경에서는 복잡한 키 사용 필수)
+        const JWT_SECRET = "your_secret_key_here";
+        
+        export function generateJWT(payload) {
+            // 1. 헤더 생성 및 Base64 인코딩
+            const header = { alg: "HS256", typ: "JWT" };
+            const encodedHeader = btoa(JSON.stringify(header));
+            // 2. 페이로드 Base64 인코딩
+            const encodedPayload = btoa(JSON.stringify(payload)); // JSON 형태로 변환 후 인코딩
+            // 3. 서명 생성 (HMAC-SHA256 알고리즘 사용)
+            const signature = CryptoJS.HmacSHA256(`${encodedHeader}.${encodedPayload}`, JWT_SECRET);
+            const encodedSignature = CryptoJS.enc.Base64.stringify(signature);
+            // 4. 최종 토큰 조합
+            return `${encodedHeader}.${encodedPayload}.${encodedSignature}`;
+        }
+
+        function verifyJWT(token) { // 토큰검증
+            try {
+                // 1. 토큰을헤더, 페이로드, 서명으로분할
+                const parts = token.split('.');
+                if (parts.length!== 3) return null; // 형식오류체크
+            
+                const [encodedHeader, encodedPayload, encodedSignature] = parts;
+                // 2. 서명재계산및비교
+                const signature = CryptoJS.HmacSHA256(`${encodedHeader}.${encodedPayload}`, JWT_SECRET);
+                const calculatedSignature= CryptoJS.enc.Base64.stringify(signature);
+                if (calculatedSignature!== encodedSignature) return null; // 서명불일치
+                // 3. 페이로드파싱및만료시간검증
+                const payload = JSON.parse(atob(encodedPayload)); // 디코딩후해석
+                if (payload.exp< Math.floor(Date.now() / 1000)) { // 밀리초단위
+                    console.log('보안토큰이만료되었습니다');
+                    return null;
+                }
+                return payload; // 검증성공
+            } catch (error) {
+                return null; // 파싱오류또는기타예외처리
+            }
+        }
+
+        function isAuthenticated() { // 사용자 인증 상태 확인
+            const token = localStorage.getItem('jwt_token');
+            if (!token) return false; // 토큰 없음
+            const payload = verifyJWT(token);
+            console.log(payload);
+            return !!payload; // 페이로드 유무로 인증 상태 판단
+        }
+            
+        export function checkAuth() { // 인증 검사 수행
+            const authenticated = isAuthenticated(); // 한 번만 검증 호출
+            
+            if (authenticated) {
+                alert('정상적으로 토큰이 검증되었습니다.');
+            } else {
+                alert('토큰 검증 에러!! 인증되지 않은 접근입니다.');
+                window.location.href = '../login/login.html'; // 로그인 페이지 이동
+            }
+        }
+
 </details>
 <details>
 <summary>js_data_type.js</summary>
+
+        let number = 5;
+        let str = "문자열 입력"; // “ “도 묶음 가능
+        let prime = 1.5123;
+        let is_ok = true; // 참
+        let is_not = false; // 거짓
+        let undefi; // 변수 이름만, 초기화 x
+        let empty = null; // 비어 있음
+
+        console.log(undefi, empty); // 여러 개 출력
+
+        const sym1 = Symbol('test'); // 심볼 함수로 값 생성
+        let symbolVar1 = sym1; // 변수 초기화
+
+        const airline = ["비행기", 320, "airbus", ["V1", true]];
+        // 다양한 데이터 배열
+
+        // 빈 객체 생성
+        const obj1 = {};
+
+        // 속성을 추가하여 객체생성
+        const obj2 = {
+            name: "John Doe",
+            age: 30,
+            isMale: true,
+        };
+
+        console.log(symbolVar1.toString()); // 문자열 변환 출력
+        console.log(obj1, obj2, airline); // 여러 개 출력
+
+        const users = new Map(); // 사용자 정보 Map 객체 생성
+        users.set("user1", { // 사용자 정보 추가
+        id: 1, password: "password123",
+        });
+        users.set("user2", {
+        id: 2, password: "password456",
+        });
+
+        // Map 객체의 모든 사용자 정보 반복출력
+        for (const [username, user] of users) {
+            console.log(`사용자 이름: ${username}`, `ID: ${user.id}`);
+            console.log(`비밀번호: ${user.password}`);
+        }
+        // Set 객체 활용 (예), 이름만 저장할 Set 객체 생성
+        const usernames = new Set();
+
+        usernames.add("user1"); // 사용자 이름 추가
+        usernames.add("user2");
+
+        // Set 객체의 모든 사용자 이름 반복출력
+        for (const username of usernames) {
+            console.log(`사용자 이름: ${username}`);
+        }
+
 </details>
 <details>
 <summary>js_join.js</summary>
+
+        import { session_set2 } from './js_session.js';
+
+        function join(){ // 회원가입기능
+            let form = document.querySelector("#join_form"); // 로그인폼식별자
+            let name = document.querySelector("#form3Example1c");
+            let email = document.querySelector("#form3Example3c");
+            let password = document.querySelector("#form3Example4c");
+            let re_password= document.querySelector("#form3Example4cd");
+            let agree = document.querySelector("#form2Example3c");
+            
+            const nameRegex = /^[가-힣]+$/;
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            const pwRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+
+            form.action= "../index.html"; // 로그인성공시이동
+            form.method= "get"; // 전송방식
+
+            if(name.value.length=== 0 || email.value.length=== 0 || password.value.length=== 0 || re_password.length=== 0){
+                alert("회원가입폼에모든정보를입력해주세요.");
+            }
+
+            if (!nameRegex.test(name.value)) { // 이름 검사
+                alert("이름은 한글만 입력 가능합니다.");
+                name.focus();
+                return;
+            }
+            if (!emailRegex.test(email.value)) { // 이메일 검사
+                alert("이메일 형식이 올바르지 않습니다.");
+                email.focus();
+                return;
+            }
+
+            if (!pwRegex.test(password.value)) { // 비밀번호 검사
+                alert("비밀번호는 8자 이상이며 대소문자, 숫자, 특수문자를 모두 포함해야 합니다.");
+                password.focus();
+                return;
+            }
+        
+            if (password.value !== re_password.value) { // 비밀번호 일치 검사
+                alert("비밀번호가 일치하지 않습니다.");
+                re_password.focus();
+                return;
+            }
+            
+            if (!agree.checked) { // 약관 동의 확인
+                alert("약관에 동의하셔야 가입이 가능합니다.");
+                return;
+            }
+            
+            else{
+                const newSignUp = new SignUp(name.value, email.value, password.value, re_password.value); // 회원가입정보객체생성
+                session_set2(newSignUp); // 세션저장및객체전달
+                form.submit(); // 폼실행
+            }
+        }
+
+        class SignUp {
+            constructor(name, email, password, re_password) {
+            // 생성자 함수: 객체 생성 시 회원 정보 초기화
+            this._name = name;
+            this._email = email;
+            this._password = password;
+            this._re_password = re_password;
+            }
+            // 전체 회원 정보를 한 번에 설정하는 함수
+            setUserInfo(name, email, password, re_password) {
+                this._name = name;
+                this._email = email;
+                this._password = password;
+                this._re_password = re_password;
+        }
+
+        // 전체 회원 정보를 한 번에 가져오는 함수
+            getUserInfo() {
+                return {
+                    name: this._name,
+                    email: this._email,
+                    password: this._password,
+                    re_password: this._re_password
+                };
+            }
+        }
+
+
+
+        document.getElementById("join_btn").addEventListener('click', join); // 이벤트리스너
+
 </details>
 <details>
 <summary>js_login.js</summary>
+
+        import { session_set, session_get, session_check } from './js_session.js';
+        import { encrypt_text, decrypt_text } from './crypto.js';
+        import { generateJWT, checkAuth } from './js_ jwt_token.js';
+
+        function init(){ // 로그인 폼에 쿠키에서 가져온 아이디 입력
+            const emailInput = document.getElementById('typeEmailX');
+            const idsave_check = document.getElementById('idSaveCheck');
+            let get_id = getCookie("id");
+            if(get_id) {
+                emailInput.value = get_id;
+                idsave_check.checked = true;
+            }
+            session_check(); // 세션 유무 검사
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            init();
+        });
+
+        function init_logined(){
+            if(sessionStorage){
+                decrypt_text(); // 복호화 함수
+            }
+            else{
+                alert("세션 스토리지 지원 x");
+            }
+        }
+
+        const check_xss = (input) => {
+            // DOMPurify 라이브러리 로드 (CDN 사용)
+            const DOMPurify = window.DOMPurify;
+            // 입력 값을 DOMPurify로 sanitize
+            const sanitizedInput = DOMPurify.sanitize(input);
+            // Sanitized된 값과 원본 입력 값 비교
+        if (sanitizedInput !== input) {
+            // XSS 공격 가능성 발견 시 에러 처리
+        alert('XSS 공격 가능성이 있는 입력값을 발견했습니다.');
+            return false;
+            }
+            // Sanitized된 값 반환
+        return sanitizedInput;
+        };
+
+        function setCookie(name, value, expiredays) {
+            var date = new Date();
+            date.setDate(date.getDate() + expiredays);
+            document.cookie = escape(name) + "=" + escape(value) + "; expires=" + date.toUTCString() + "; path=/" + ";SameSite=None; Secure";
+        }
+            
+        function getCookie(name) {
+            var cookie = document.cookie;
+            console.log("쿠키를 요청합니다.");
+
+            if (cookie != "") {
+                var cookie_array = cookie.split("; ");
+                for ( var index in cookie_array) {
+                    var cookie_name = cookie_array[index].split("=");
+                    if (cookie_name[0] == "id") 
+                        {
+                    return cookie_name[1];
+                    }
+                }
+            }
+            return ;
+        }
+
+
+        function logout(){
+            session_del(); // 세션 삭제
+            location.href='../index.html';
+        }
+
+        const check_input = () => {
+            const loginForm = document.getElementById('login_form');
+            const loginBtn = document.getElementById('login_btn');
+            const emailInput= document.getElementById('typeEmailX');
+            const passwordInput = document.getElementById('typePasswordX');
+            
+            const c = '아이디, 패스워드를 체크합니다';
+            alert(c);
+
+            const emailValue = emailInput.value.trim(); //trim : 공백 제거 함수
+            const passwordValue = passwordInput.value.trim();
+
+            const sanitizedPassword = check_xss(passwordValue);
+            // check_xss 함수로 비밀번호 Sanitize
+            const sanitizedEmail = check_xss(emailValue);
+            // check_xss 함수로 비밀번호 Sanitize
+            
+            // 전역 변수 추가, 맨 위 위치
+            const idsave_check = document.getElementById('idSaveCheck');
+            const payload = {
+                id: emailValue,
+                exp: Math.floor(Date.now() / 1000) + 3600 // 1시간 (3600초)
+            };
+            const jwtToken = generateJWT(payload);
+
+            if (emailValue === '') {
+                alert('이메일을 입력하세요.');
+                return false;
+            }
+
+            if (passwordValue === '') {
+                alert('비밀번호를 입력하세요.');
+                return false;
+            }
+
+            if(emailValue.length > 20) {
+                alert('이메일은 20자 이하로 입력해주세요.');
+                return false;
+            }
+
+            if(passwordValue.length > 15) {
+                alert('비밀번호는 15자 이하로 입력해주세요.');
+            }
+
+            if (emailValue.length < 5) {
+                alert('아이디는최소5글자이상입력해야합니다.');
+                return false;
+            }
+                
+            if (passwordValue.length < 10) {
+                alert('비밀번호는 반드시 10글자이상 입력해야합니다.');
+                return false;
+            }
+                
+            const hasSpecialChar = passwordValue.match(/[!,@#$%^&*()_+\=\[\]{};':"\\|,.<>\/?]+/) !== null;
+                
+            if (!hasSpecialChar) {
+            alert('패스워드는 특수문자를 1개이상 포함해야합니다.');
+            return false;
+            }
+                
+            const hasUpperCase = passwordValue.match(/[A-Z]+/) !== null;
+            const hasLowerCase = passwordValue.match(/[a-z]+/) !== null;
+            
+                if (!hasUpperCase || !hasLowerCase) {
+            alert('패스워드는 대소문자를 1개이상 포함해야합니다.');
+            return false;
+            }
+
+            // 3글자 이상 반복 확인 (예: aaa, 111, 가나다가나다)
+            const repeatedPattern = /(.{1,3})\1+/;
+            if (repeatedPattern.test(emailValue) || repeatedPattern.test(passwordValue)) {
+                return alert('3글자 이상 반복된 패턴은 사용할 수 없습니다.');
+            }
+
+            // 연속된 숫자 두 개 이상 반복 확인 (예: 12아이디12 → 12 반복)
+            const numPattern = /(\d{2})[\s\S]*\1/;
+            if (numPattern.test(emailValue) || numPattern.test(passwordValue)) {
+                return alert('같은 숫자 두 자리가 반복되면 안 됩니다. (예: 1212)');
+            }
+
+
+            if (!sanitizedEmail) {
+                // Sanitize된 비밀번호 사용
+            return false;
+                }
+                if (!sanitizedPassword) {
+                // Sanitize된 비밀번호 사용
+            return false;
+            }
+            
+            
+            // 검사 마무리 단계 쿠키 저장, 최하단 submit 이전
+            if(idsave_check.checked == true) { // 아이디 체크 o
+                alert("쿠키를 저장합니다.", emailValue);
+                setCookie("id", emailValue, 1); // 1일 저장
+                alert("쿠키 값 :" + emailValue);
+            }
+            else{ // 아이디 체크 x
+                setCookie("id", emailValue.value, 0); //날짜를 0 - 쿠키 삭제
+            }    
+
+            console.log('이메일:', emailValue);
+            console.log('비밀번호:', passwordValue);
+            session_set(); // 세션 생성
+            localStorage.setItem('jwt_token', jwtToken);
+            loginForm.submit();
+        };
+
+        document.getElementById("login_btn").addEventListener('click', check_input);
+        
 </details>
 <details>
 <summary>js_login2.js</summary>
+
+        import { session_set, session_get, session_check } from './js_session.js';
+        import { encrypt_text, decrypt_text } from './crypto.js';
+        import { generateJWT, checkAuth } from './js_ jwt_token.js';
+
+        function init(){ // 로그인 폼에 쿠키에서 가져온 아이디 입력
+            const emailInput = document.getElementById('typeEmailX');
+            const idsave_check = document.getElementById('idSaveCheck');
+            let get_id = getCookie("id");
+            if(get_id) {
+                emailInput.value = get_id;
+                idsave_check.checked = true;
+            }
+            session_check(); // 세션 유무 검사
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAuth(); //토큰 검증
+            init_logined(); //복호화
+        });
+
+        function init_logined(){
+            if(sessionStorage){
+                decrypt_text(); // 복호화 함수
+            }
+            else{
+                alert("세션 스토리지 지원 x");
+            }
+        }
+
+        const check_xss = (input) => {
+            // DOMPurify 라이브러리 로드 (CDN 사용)
+            const DOMPurify = window.DOMPurify;
+            // 입력 값을 DOMPurify로 sanitize
+            const sanitizedInput = DOMPurify.sanitize(input);
+            // Sanitized된 값과 원본 입력 값 비교
+        if (sanitizedInput !== input) {
+            // XSS 공격 가능성 발견 시 에러 처리
+        alert('XSS 공격 가능성이 있는 입력값을 발견했습니다.');
+            return false;
+            }
+            // Sanitized된 값 반환
+        return sanitizedInput;
+        };
+
+        function setCookie(name, value, expiredays) {
+            var date = new Date();
+            date.setDate(date.getDate() + expiredays);
+            document.cookie = escape(name) + "=" + escape(value) + "; expires=" + date.toUTCString() + "; path=/" + ";SameSite=None; Secure";
+        }
+            
+        function getCookie(name) {
+            var cookie = document.cookie;
+            console.log("쿠키를 요청합니다.");
+
+            if (cookie != "") {
+                var cookie_array = cookie.split("; ");
+                for ( var index in cookie_array) {
+                    var cookie_name = cookie_array[index].split("=");
+                    if (cookie_name[0] == "id") 
+                        {
+                    return cookie_name[1];
+                    }
+                }
+            }
+            return ;
+        }
+
+        function logout(){
+            session_del(); // 세션 삭제
+            location.href='../index.html';
+        }
+
+        const check_input = () => {
+            const loginForm = document.getElementById('login_form');
+            const loginBtn = document.getElementById('login_btn');
+            const emailInput= document.getElementById('typeEmailX');
+            const passwordInput = document.getElementById('typePasswordX');
+            
+            const c = '로그아웃 되었습니다';
+            alert(c);
+
+            const emailValue = emailInput.value.trim(); //trim : 공백 제거 함수
+            const passwordValue = passwordInput.value.trim();
+
+            const sanitizedPassword = check_xss(passwordValue);
+            // check_xss 함수로 비밀번호 Sanitize
+            const sanitizedEmail = check_xss(emailValue);
+            // check_xss 함수로 비밀번호 Sanitize
+            
+            // 전역 변수 추가, 맨 위 위치
+            const idsave_check = document.getElementById('idSaveCheck');
+            const payload = {
+                id: emailValue,
+                exp: Math.floor(Date.now() / 1000) + 3600 // 1시간 (3600초)
+            };
+            const jwtToken = generateJWT(payload);
+
+            if (emailValue === '') {
+                alert('이메일을 입력하세요.');
+                return false;
+            }
+
+            if (passwordValue === '') {
+                alert('비밀번호를 입력하세요.');
+                return false;
+            }
+
+            if (emailValue.length < 5) {
+                alert('아이디는최소5글자이상입력해야합니다.');
+                return false;
+            }
+                
+            if (passwordValue.length < 12) {
+                alert('비밀번호는 반드시 12글자이상 입력해야합니다.');
+                return false;
+            }
+                
+            const hasSpecialChar = passwordValue.match(/[!,@#$%^&*()_+\=\[\]{};':"\\|,.<>\/?]+/) !== null;
+                
+            if (!hasSpecialChar) {
+            alert('패스워드는 특수문자를 1개이상 포함해야합니다.');
+            return false;
+            }
+                
+            const hasUpperCase = passwordValue.match(/[A-Z]+/) !== null;
+            const hasLowerCase = passwordValue.match(/[a-z]+/) !== null;
+            
+                if (!hasUpperCase || !hasLowerCase) {
+            alert('패스워드는 대소문자를 1개이상 포함해야합니다.');
+            return false;
+            }
+
+            if (!sanitizedEmail) {
+                // Sanitize된 비밀번호 사용
+            return false;
+                }
+                if (!sanitizedPassword) {
+                // Sanitize된 비밀번호 사용
+            return false;
+            }
+            
+            
+            // 검사 마무리 단계 쿠키 저장, 최하단 submit 이전
+            if(idsave_check.checked == true) { // 아이디 체크 o
+                alert("쿠키를 저장합니다.", emailValue);
+                setCookie("id", emailValue, 1); // 1일 저장
+                alert("쿠키 값 :" + emailValue);
+            }
+            else{ // 아이디 체크 x
+                setCookie("id", emailValue.value, 0); //날짜를 0 - 쿠키 삭제
+            }    
+
+            console.log('이메일:', emailValue);
+            console.log('비밀번호:', passwordValue);
+            session_set(); // 세션 생성
+            localStorage.setItem('jwt_token', jwtToken);
+            loginForm.submit();
+        };
+
+        document.getElementById("logout_btn").addEventListener('click', check_input);
+        
 </details>
 <details>
 <summary>js_map.js</summary>
+
+        // 마커를 담을 배열입니다
+        var markers = [];
+
+        var container = document.getElementById('map'); //지도를 담을 영역의 DOM 레퍼런스
+        var options = { //지도를 생성할 때 필요한 기본 옵션
+            center: new kakao.maps.LatLng(37.380139, 126.925288), //지도의 중심좌표.
+            level: 3 //지도의 레벨(확대, 축소 정도)
+        };
+
+        var map = new kakao.maps.Map(container, options); //지도 생성 및 객체 리턴
+
+        // 마커가 표시될 위치입니다 
+        var markerPosition  = new kakao.maps.LatLng(33.450701, 126.570667); 
+
+        // 마커를 생성합니다
+        var marker = new kakao.maps.Marker({
+            position: markerPosition
+        });
+
+        var geocoder = new kakao.maps.services.Geocoder();
+
+        var marker = new kakao.maps.Marker(), // 클릭한 위치를 표시할 마커입니다
+            infowindow = new kakao.maps.InfoWindow({zindex:1}); // 클릭한 위치에 대한 주소를 표시할 인포윈도우입니다
+
+        // 현재 지도 중심좌표로 주소를 검색해서 지도 좌측 상단에 표시합니다
+        searchAddrFromCoords(map.getCenter(), displayCenterInfo);
+
+        // 지도를 클릭했을 때 클릭 위치 좌표에 대한 주소정보를 표시하도록 이벤트를 등록합니다
+        kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
+            searchDetailAddrFromCoords(mouseEvent.latLng, function(result, status) {
+                if (status === kakao.maps.services.Status.OK) {
+                    var detailAddr = !!result[0].road_address ? '<div>도로명주소 : ' + result[0].road_address.address_name + '</div>' : '';
+                    detailAddr += '<div>지번 주소 : ' + result[0].address.address_name + '</div>';
+                    
+                    var content = '<div class="bAddr">' +
+                                    '<span class="title">법정동 주소정보</span>' + 
+                                    detailAddr + 
+                                '</div>';
+
+                    // 마커를 클릭한 위치에 표시합니다 
+                    marker.setPosition(mouseEvent.latLng);
+                    marker.setMap(map);
+
+                    // 인포윈도우에 클릭한 위치에 대한 법정동 상세 주소정보를 표시합니다
+                    infowindow.setContent(content);
+                    infowindow.open(map, marker);
+                }   
+            });
+        });
+
+        // 중심 좌표나 확대 수준이 변경됐을 때 지도 중심 좌표에 대한 주소 정보를 표시하도록 이벤트를 등록합니다
+        kakao.maps.event.addListener(map, 'idle', function() {
+            searchAddrFromCoords(map.getCenter(), displayCenterInfo);
+        });
+
+        function searchAddrFromCoords(coords, callback) {
+            // 좌표로 행정동 주소 정보를 요청합니다
+            geocoder.coord2RegionCode(coords.getLng(), coords.getLat(), callback);         
+        }
+
+        function searchDetailAddrFromCoords(coords, callback) {
+            // 좌표로 법정동 상세 주소 정보를 요청합니다
+            geocoder.coord2Address(coords.getLng(), coords.getLat(), callback);
+        }
+
+        // 지도 좌측상단에 지도 중심좌표에 대한 주소정보를 표출하는 함수입니다
+        function displayCenterInfo(result, status) {
+            if (status === kakao.maps.services.Status.OK) {
+                var infoDiv = document.getElementById('centerAddr');
+
+                for(var i = 0; i < result.length; i++) {
+                    // 행정동의 region_type 값은 'H' 이므로
+                    if (result[i].region_type === 'H') {
+                        infoDiv.innerHTML = result[i].address_name;
+                        break;
+                    }
+                }
+            }    
+        }
+
+        // 지도에 마커를 표시합니다
+        marker.setMap(map);
+
+        // 일반 지도와 스카이뷰로 지도 타입을 전환할 수 있는 지도타입 컨트롤을 생성합니다
+        var mapTypeControl = new kakao.maps.MapTypeControl();
+        // 지도 타입 컨트롤을 지도에 표시합니다
+        map.addControl(mapTypeControl, kakao.maps.ControlPosition.TOPRIGHT);
+        // 지도 확대 축소를 제어할 수 있는 줌 컨트롤을 생성합니다
+        var zoomControl = new kakao.maps.ZoomControl();
+        map.addControl(zoomControl, kakao.maps.ControlPosition.RIGHT);
+        // 지도에 지형정보를 표시하도록 지도타입을 추가합니다
+        map.addOverlayMapTypeId(kakao.maps.MapTypeId.TERRAIN);
+
+        //////////////////////////////////////////////////////////////////////////////////////////
+
+        // 지도에 클릭 이벤트를 등록합니다
+        // 지도를 클릭하면 마지막 파라미터로 넘어온 함수를 호출합니다
+        kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
+            // 클릭한 위도, 경도 정보를 가져옵니다 
+            var latlng = mouseEvent.latLng;
+            // 마커 위치를 클릭한 위치로 옮깁니다
+            marker.setPosition(latlng);
+            var message = '클릭한 위치의 위도는 ' + latlng.getLat() + ' 이고, ';
+            message += '경도는 ' + latlng.getLng() + ' 입니다';
+            var resultDiv = document.getElementById('clickLatlng');
+            resultDiv.innerHTML = message;
+        });
+
+        ///////////////////////////////////////////////////////////////////////////////////////
+
+        // 장소 검색 객체를 생성합니다
+        var ps = new kakao.maps.services.Places();  
+
+        // 검색 결과 목록이나 마커를 클릭했을 때 장소명을 표출할 인포윈도우를 생성합니다
+        var infowindow = new kakao.maps.InfoWindow({zIndex:1});
+
+        // 키워드로 장소를 검색합니다
+        searchPlaces();
+
+        // 키워드 검색을 요청하는 함수입니다
+        function searchPlaces() {
+
+            var keyword = document.getElementById('keyword').value;
+
+            if (!keyword.replace(/^\s+|\s+$/g, '')) {
+                alert('키워드를 입력해주세요!');
+                return false;
+            }
+
+            // 장소검색 객체를 통해 키워드로 장소검색을 요청합니다
+            ps.keywordSearch( keyword, placesSearchCB); 
+        }
+
+        // 장소검색이 완료됐을 때 호출되는 콜백함수 입니다
+        function placesSearchCB(data, status, pagination) {
+            if (status === kakao.maps.services.Status.OK) {
+
+                // 정상적으로 검색이 완료됐으면
+                // 검색 목록과 마커를 표출합니다
+                displayPlaces(data);
+
+                // 페이지 번호를 표출합니다
+                displayPagination(pagination);
+
+            } else if (status === kakao.maps.services.Status.ZERO_RESULT) {
+
+                alert('검색 결과가 존재하지 않습니다.');
+                return;
+
+            } else if (status === kakao.maps.services.Status.ERROR) {
+
+                alert('검색 결과 중 오류가 발생했습니다.');
+                return;
+
+            }
+        }
+
+        // 검색 결과 목록과 마커를 표출하는 함수입니다
+        function displayPlaces(places) {
+
+            var listEl = document.getElementById('placesList'), 
+            menuEl = document.getElementById('menu_wrap'),
+            fragment = document.createDocumentFragment(), 
+            bounds = new kakao.maps.LatLngBounds(), 
+            listStr = '';
+            
+            // 검색 결과 목록에 추가된 항목들을 제거합니다
+            removeAllChildNods(listEl);
+
+            // 지도에 표시되고 있는 마커를 제거합니다
+            removeMarker();
+            
+            for ( var i=0; i<places.length; i++ ) {
+
+                // 마커를 생성하고 지도에 표시합니다
+                var placePosition = new kakao.maps.LatLng(places[i].y, places[i].x),
+                    marker = addMarker(placePosition, i), 
+                    itemEl = getListItem(i, places[i]); // 검색 결과 항목 Element를 생성합니다
+
+                // 검색된 장소 위치를 기준으로 지도 범위를 재설정하기위해
+                // LatLngBounds 객체에 좌표를 추가합니다
+                bounds.extend(placePosition);
+
+                // 마커와 검색결과 항목에 mouseover 했을때
+                // 해당 장소에 인포윈도우에 장소명을 표시합니다
+                // mouseout 했을 때는 인포윈도우를 닫습니다
+                (function(marker, title) {
+                    kakao.maps.event.addListener(marker, 'mouseover', function() {
+                        displayInfowindow(marker, title);
+                    });
+
+                    kakao.maps.event.addListener(marker, 'mouseout', function() {
+                        infowindow.close();
+                    });
+
+                    itemEl.onmouseover =  function () {
+                        displayInfowindow(marker, title);
+                    };
+
+                    itemEl.onmouseout =  function () {
+                        infowindow.close();
+                    };
+                })(marker, places[i].place_name);
+
+                fragment.appendChild(itemEl);
+            }
+
+            // 검색결과 항목들을 검색결과 목록 Element에 추가합니다
+            listEl.appendChild(fragment);
+            menuEl.scrollTop = 0;
+
+            // 검색된 장소 위치를 기준으로 지도 범위를 재설정합니다
+            map.setBounds(bounds);
+        }
+
+        // 검색결과 항목을 Element로 반환하는 함수입니다
+        function getListItem(index, places) {
+
+            var el = document.createElement('li'),
+            itemStr = '<span class="markerbg marker_' + (index+1) + '"></span>' +
+                        '<div class="info">' +
+                        '   <h5>' + places.place_name + '</h5>';
+
+            if (places.road_address_name) {
+                itemStr += '    <span>' + places.road_address_name + '</span>' +
+                            '   <span class="jibun gray">' +  places.address_name  + '</span>';
+            } else {
+                itemStr += '    <span>' +  places.address_name  + '</span>'; 
+            }
+                        
+            itemStr += '  <span class="tel">' + places.phone  + '</span>' +
+                        '</div>';           
+
+            el.innerHTML = itemStr;
+            el.className = 'item';
+
+            return el;
+        }
+
+        // 마커를 생성하고 지도 위에 마커를 표시하는 함수입니다
+        function addMarker(position, idx, title) {
+            var imageSrc = 'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_number_blue.png', // 마커 이미지 url, 스프라이트 이미지를 씁니다
+                imageSize = new kakao.maps.Size(36, 37),  // 마커 이미지의 크기
+                imgOptions =  {
+                    spriteSize : new kakao.maps.Size(36, 691), // 스프라이트 이미지의 크기
+                    spriteOrigin : new kakao.maps.Point(0, (idx*46)+10), // 스프라이트 이미지 중 사용할 영역의 좌상단 좌표
+                    offset: new kakao.maps.Point(13, 37) // 마커 좌표에 일치시킬 이미지 내에서의 좌표
+                },
+                markerImage = new kakao.maps.MarkerImage(imageSrc, imageSize, imgOptions),
+                    marker = new kakao.maps.Marker({
+                    position: position, // 마커의 위치
+                    image: markerImage 
+                });
+
+            marker.setMap(map); // 지도 위에 마커를 표출합니다
+            markers.push(marker);  // 배열에 생성된 마커를 추가합니다
+
+            return marker;
+        }
+
+        // 지도 위에 표시되고 있는 마커를 모두 제거합니다
+        function removeMarker() {
+            for ( var i = 0; i < markers.length; i++ ) {
+                markers[i].setMap(null);
+            }   
+            markers = [];
+        }
+
+        // 검색결과 목록 하단에 페이지번호를 표시는 함수입니다
+        function displayPagination(pagination) {
+            var paginationEl = document.getElementById('pagination'),
+                fragment = document.createDocumentFragment(),
+                i; 
+
+            // 기존에 추가된 페이지번호를 삭제합니다
+            while (paginationEl.hasChildNodes()) {
+                paginationEl.removeChild (paginationEl.lastChild);
+            }
+
+            for (i=1; i<=pagination.last; i++) {
+                var el = document.createElement('a');
+                el.href = "#";
+                el.innerHTML = i;
+
+                if (i===pagination.current) {
+                    el.className = 'on';
+                } else {
+                    el.onclick = (function(i) {
+                        return function() {
+                            pagination.gotoPage(i);
+                        }
+                    })(i);
+                }
+
+                fragment.appendChild(el);
+            }
+            paginationEl.appendChild(fragment);
+        }
+
+        // 검색결과 목록 또는 마커를 클릭했을 때 호출되는 함수입니다
+        // 인포윈도우에 장소명을 표시합니다
+        function displayInfowindow(marker, title) {
+            var content = '<div style="padding:5px;z-index:1;">' + title + '</div>';
+
+            infowindow.setContent(content);
+            infowindow.open(map, marker);
+        }
+
+        // 검색결과 목록의 자식 Element를 제거하는 함수입니다
+        function removeAllChildNods(el) {   
+            while (el.hasChildNodes()) {
+                el.removeChild (el.lastChild);
+            }
+        }
+
+        ////////////////////////////////////////////////////////////////////////
+
+        // 주소-좌표 변환 객체를 생성합니다
+        var geocoder = new kakao.maps.services.Geocoder();
+
+        var marker = new kakao.maps.Marker(), // 클릭한 위치를 표시할 마커입니다
+            infowindow = new kakao.maps.InfoWindow({zindex:1}); // 클릭한 위치에 대한 주소를 표시할 인포윈도우입니다
+
+        // 현재 지도 중심좌표로 주소를 검색해서 지도 좌측 상단에 표시합니다
+        searchAddrFromCoords(map.getCenter(), displayCenterInfo);
+
+        // 지도를 클릭했을 때 클릭 위치 좌표에 대한 주소정보를 표시하도록 이벤트를 등록합니다
+        kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
+            searchDetailAddrFromCoords(mouseEvent.latLng, function(result, status) {
+                if (status === kakao.maps.services.Status.OK) {
+                    var detailAddr = !!result[0].road_address ? '<div>도로명주소 : ' + result[0].road_address.address_name + '</div>' : '';
+                    detailAddr += '<div>지번 주소 : ' + result[0].address.address_name + '</div>';
+                    
+                    var content = '<div class="bAddr">' +
+                                    '<span class="title">법정동 주소정보</span>' + 
+                                    detailAddr + 
+                                '</div>';
+
+                    // 마커를 클릭한 위치에 표시합니다 
+                    marker.setPosition(mouseEvent.latLng);
+                    marker.setMap(map);
+
+                    // 인포윈도우에 클릭한 위치에 대한 법정동 상세 주소정보를 표시합니다
+                    infowindow.setContent(content);
+                    infowindow.open(map, marker);
+                }   
+            });
+        });
+
+        // 중심 좌표나 확대 수준이 변경됐을 때 지도 중심 좌표에 대한 주소 정보를 표시하도록 이벤트를 등록합니다
+        kakao.maps.event.addListener(map, 'idle', function() {
+            searchAddrFromCoords(map.getCenter(), displayCenterInfo);
+        });
+
+        function searchAddrFromCoords(coords, callback) {
+            // 좌표로 행정동 주소 정보를 요청합니다
+            geocoder.coord2RegionCode(coords.getLng(), coords.getLat(), callback);         
+        }
+
+        function searchDetailAddrFromCoords(coords, callback) {
+            // 좌표로 법정동 상세 주소 정보를 요청합니다
+            geocoder.coord2Address(coords.getLng(), coords.getLat(), callback);
+        }
+
+        // 지도 좌측상단에 지도 중심좌표에 대한 주소정보를 표출하는 함수입니다
+        function displayCenterInfo(result, status) {
+            if (status === kakao.maps.services.Status.OK) {
+                var infoDiv = document.getElementById('centerAddr');
+
+                for(var i = 0; i < result.length; i++) {
+                    // 행정동의 region_type 값은 'H' 이므로
+                    if (result[i].region_type === 'H') {
+                        infoDiv.innerHTML = result[i].address_name;
+                        break;
+                    }
+                }
+            }    
+        }
+
 </details>
 <details>
 <summary>js_popup.js</summary>
+
+        // var close_time; // 시간 정보
+        // var close_time2 = 50; // 10초 설정
+
+        // clearTimeout(close_time); // 재호출 정지
+        // close_time= setTimeout("close_window()", 50000);
+        //  // 1/1000 초 지정, 바로 시작 
+        // show_time(); // 실시간 시간 보여주기
+
+        // function show_time(){
+        //     let divClock = document.getElementById('Time');
+        //     divClock.innerText = close_time2; // 10초 삽입 시작
+        //    close_time2--; // 1초씩 감소
+        //    setTimeout(show_time, 1000);  //1초마다 갱신
+        // }
+
+        function close_window() { // 함수 정의
+            window.close(); // 윈도우 닫기
+        }
+
+        function setCookie(name, value, expiredays) {
+            var date = new Date();
+            date.setDate(date.getDate() + expiredays);
+            document.cookie = escape(name) + "=" + escape(value) + "; expires=" + date.toUTCString() + "; path=/" + ";SameSite=None; Secure";
+        }
+            
+        function getCookie(name) {
+            var cookie = document.cookie;
+            console.log("쿠키를 요청합니다.");
+
+            if (cookie != "") {
+                var cookie_array = cookie.split("; ");
+                for ( var index in cookie_array) {
+                    var cookie_name = cookie_array[index].split("=");
+                    if (cookie_name[0] == "popupYN") 
+                        {
+                    return cookie_name[1];
+                    }
+                }
+            }
+            return ;
+        }
+
+        function closePopup() {
+            if (document.getElementById('check_popup').value) 
+            {
+                setCookie("popupYN", "N", 1);
+                console.log("쿠키를 설정합니다.");
+                self.close();
+            }
+        }
+
+
+        function pop_up() {
+            var cookieCheck = getCookie("popupYN");
+            if (cookieCheck != "N"){
+            window.open("../popup/popup.html", "팝업테스트", "width=400, height=300, top=10, left=10");
+            }
+        }
+
+        function over(obj) {
+            obj.src="image/LOGO2.png";
+        }
+        function out(obj) {
+            obj.src="image/LOGO.png";
+        }
+
+        // const over = (obj) => { //화살표 생김 ES 6버전 이후후
+        //     obj.src = "image/LOGO.png";
+        // };
+
+        function show_clock(){
+            let currentDate= new Date(); // 현재시스템날짜객체생성
+            let divClock= document.getElementById('divClock');
+            let msg = "현재시간: ";
+            if(currentDate.getHours()>12){  // 12시보다크면오후아니면오전
+                msg += "오후";
+                msg += currentDate.getHours()-12+"시";
+            }
+            else {
+                msg += "오전";
+                msg += currentDate.getHours()+"시";
+            }
+            msg += currentDate.getMinutes()+"분";
+            msg += currentDate.getSeconds()+"초";
+            divClock.innerText= msg;
+            
+            if (currentDate.getMinutes()>58) {    //정각1분전빨강색출력
+                divClock.style.color="red";
+            }
+            setTimeout(show_clock, 1000);  //1초마다갱신
+        }
+
+
 </details>
 <details>
 <summary>js_search.js</summary>
+
+        document.getElementById("search_button_msg").addEventListener('click', search_message);
+        function search_message(){
+        alert("검색을 수행합니다!");
+        }
+
+        // const search_message = () => {
+        //     const c = '검색을 수행합니다';
+        //     alert(c);
+        // };
+
+        // function googleSearch() {
+        //     const searchTerm = document.getElementById("search_input").value; // 검색어로 설정
+        //     const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(searchTerm)}`;
+        //     // 새 창에서 구글 검색을 수행
+        //     window.open(googleSearchUrl, "_blank"); // 새로운 창에서 열기.
+        //     return false;
+        // }
+
+
+        //위 코드를 활용해 비속어 필터 기능 추가, 개인적으로 바꿨으므로 지워도 괜찮음, 위에 있는 주석처리 코드가 원본
+        function googleSearch() {
+            const searchTerm = document.getElementById("search_input").value.trim(); // 공백을 제거하고 검색어 자체만 확인, 공백도 걸러줌
+
+            // 공백 검사
+            if (searchTerm.length === 0) {
+                alert("검색어를 입력해주세요.");
+                return false; // 함수 중단
+            }
+
+            // 비속어 리스트 정의
+            const badWords = ["시발", "씨발", "새끼", "병신", "개새끼","존나"]; //개인적으로 추가
+
+            // 반복문을 이용한 비속어 검사
+            for (let i = 0; i < badWords.length; i++) {
+                if (searchTerm.includes(badWords[i])) {
+                    alert("부적절한 단어가 포함되어 있습니다. 다시 입력해주세요.");
+                    return false; // 함수 중단
+                }
+            }
+
+            // 조건 통과 시 구글 검색 수행
+            const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(searchTerm)}`;
+            window.open(googleSearchUrl, "_blank");
+            return false;
+        }
+
 </details>
 <details>
 <summary>js_session.js</summary>
+
+        import { encrypt_text, decrypt_text } from './crypto.js';
+
+
+        //  export function session_set() { //세션 저장
+        //     let session_id = document.querySelector("#typeEmailX"); // DOM 트리에서 ID 검색
+        //     let session_pass = document.querySelector("#typePasswordX"); // DOM 트리에서 pass 검색
+        //     let random = new Date(); // 랜덤 타임스탬프
+                
+        //     const obj = { // 객체 선언
+        //         id : id.value,
+        //         otp : random
+        //     }
+
+        //     if (sessionStorage) {
+        //         let en_text = encrypt_text(session_pass.value);
+        //         sessionStorage.setItem("Session_Storage_id", session_id.value);
+        //         sessionStorage.setItem("Session_Storage_pass", en_text);
+        //     } else {
+        //         alert("로컬 스토리지 지원 x");
+        //     }
+        // }
+
+        export function session_set() { //세션 저장(객체)
+            let session_id = document.querySelector("#typeEmailX"); //DOM 트리에서 ID 검색
+            let session_pass = document.querySelector("#typePasswordX"); //DOM 트리에서 pass 검색색
+            let random = new Date(); // 랜덤 타임스탬프
+
+            const obj = { // 객체 선언
+                id : session_id.value,
+                otp : random
+            }
+            
+            if (sessionStorage) {
+                const objString = JSON.stringify(obj); // 객체-> JSON 문자열 변환
+                let en_text = encrypt_text(objString); // 암호화
+                
+                sessionStorage.setItem("Session_Storage_id", session_id.value);
+                sessionStorage.setItem("Session_Storage_object", objString);
+                sessionStorage.setItem("Session_Storage_pass", en_text);
+            } else {
+                alert("세션 스토리지 지원 x");
+            }
+        }
+
+        export function session_set2(obj) { //세션 저장(객체)
+            let session_id = document.querySelector("#typeEmailX"); //DOM 트리에서 ID 검색
+            let session_pass = document.querySelector("#typePasswordX"); //DOM 트리에서 pass 검색색
+            let random = new Date(); // 랜덤 타임스탬프
+            
+            if (sessionStorage) {
+                const objString = JSON.stringify(obj); // 객체-> JSON 문자열 변환
+                let en_text = encrypt_text(objString); // 암호화
+                
+                sessionStorage.setItem("Session_Storage_join", objString);    } else {
+                alert("세션 스토리지 지원 x");
+            }
+        }
+
+        export function session_get() { //세션 읽기
+            if (sessionStorage) {
+                return sessionStorage.getItem("Session_Storage_pass");
+            } 
+            else {
+                alert("세션 스토리지 지원 x");
+            }
+        }
+
+        export function session_check() { //세션 검사
+            if (sessionStorage.getItem("Session_Storage_id")) {
+                alert("이미 로그인 되었습니다.");
+                location.href='../login/index.html'; // 로그인된 페이지로 이동
+            }
+        }
+
+        function session_del() {//세션 삭제
+            if (sessionStorage) {
+            sessionStorage.removeItem("Session_Storage_test");
+            alert('로그아웃 버튼 클릭 확인 : 세션 스토리지를 삭제합니다.');
+            } 
+            else {
+            alert("세션 스토리지 지원 x");
+            }
+        }
+
 </details>
 <details>
 <summary>js_test.js</summary>
+
+        var jb = 'hi'; // 변수 선언 후 주석 가능(한줄 주석)
+        var a = 1;
+        var b;
+        b = 5;
+        c = 10;
+
+        /*
+        여러 줄 주석 : 여러 줄에 걸쳐 주석을 처리합니다.
+        */
+
+        if(true) {
+            let c = 'let접근';
+            var c_1 = 'var 접근';
+        }
+        //console.log(C); //Error?
+        console.log(c_1);
+
+        let d = 5;
+        //let d = '값 재할당'; //Error?
+        console.log(d);
+
+        const e = '상수1 접근';
+        //e = 5;
+        //const f // Error?
+        console.log(e);
+
 </details>
 
 
