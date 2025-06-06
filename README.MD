@@ -1,9 +1,9 @@
 # HTML 프로젝트 - 깃허브
-[프로젝트 메인 주소](https://yundayoung.github.io/HTML/) 
-자바웹프로그래밍(1) 개발 내용 정리
+- [프로젝트 메인 주소](https://yundayoung.github.io/HTML/) 
+- 자바웹프로그래밍(1) 개발 내용 정리
 
 ## 목차
-- 실습 내용, 응용 및 연습 문제 정리
+- 실습 내용, 응용 및 연습 문제, 홈페이지 내용 수정 정리
 - 사용한 소스 코드 총정리
 
 ## 2주차
@@ -88,6 +88,8 @@
 ## 사용한 소스 코드 총정리
 <details>
 <summary>index.html</summary>
+<br>
+````html
 <!DOCTYPE html>
 <html lang = "ko">
 <!----부분은 주석문입니다. 웹 브라우저는 주석을 화면에 출력하지 않습니다.-->
@@ -210,5 +212,5 @@
         </div>
     </body>
 </html>
-</details>
+</details>````
 
