@@ -86,10 +86,7 @@
 - 좌표로 주소 출력하기
 
 ## 사용한 소스 코드 총정리
-<details>
-<summary>index.html</summary>
-<br>
-````html
+- index.html
 <!DOCTYPE html>
 <html lang = "ko">
 <!----부분은 주석문입니다. 웹 브라우저는 주석을 화면에 출력하지 않습니다.-->
@@ -212,6 +209,5 @@
         </div>
     </body>
 </html>
-````
 </details>
 
