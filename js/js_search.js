@@ -1,4 +1,4 @@
-document.getElementById("search_btn").addEventListener('click', search_message);
+document.getElementById("search_button_msg").addEventListener('click', search_message);
 function search_message(){
 alert("검색을 수행합니다!");
 }
@@ -28,7 +28,7 @@ function googleSearch() {
     }
 
     // 비속어 리스트 정의
-    const badWords = ["시발", "씨발", "새끼", "병신", "개새끼","존나","좆","등신"]; //개인적으로 추가
+    const badWords = ["시발", "씨발", "새끼", "병신", "개새끼","존나"]; //개인적으로 추가
 
     // 반복문을 이용한 비속어 검사
     for (let i = 0; i < badWords.length; i++) {

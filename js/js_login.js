@@ -64,6 +64,7 @@ function getCookie(name) {
     return ;
 }
 
+
 function logout(){
     session_del(); // 세션 삭제
     location.href='../index.html';
@@ -104,13 +105,22 @@ const check_input = () => {
         return false;
     }
 
+    if(emailValue.length > 20) {
+        alert('이메일은 20자 이하로 입력해주세요.');
+        return false;
+    }
+
+    if(passwordValue.length > 15) {
+        alert('비밀번호는 15자 이하로 입력해주세요.');
+    }
+
     if (emailValue.length < 5) {
         alert('아이디는최소5글자이상입력해야합니다.');
         return false;
     }
         
-    if (passwordValue.length < 12) {
-        alert('비밀번호는 반드시 12글자이상 입력해야합니다.');
+    if (passwordValue.length < 10) {
+        alert('비밀번호는 반드시 10글자이상 입력해야합니다.');
         return false;
     }
         
@@ -128,6 +138,19 @@ const check_input = () => {
     alert('패스워드는 대소문자를 1개이상 포함해야합니다.');
     return false;
     }
+
+    // 3글자 이상 반복 확인 (예: aaa, 111, 가나다가나다)
+    const repeatedPattern = /(.{1,3})\1+/;
+    if (repeatedPattern.test(emailValue) || repeatedPattern.test(passwordValue)) {
+        return alert('3글자 이상 반복된 패턴은 사용할 수 없습니다.');
+    }
+
+    // 연속된 숫자 두 개 이상 반복 확인 (예: 12아이디12 → 12 반복)
+    const numPattern = /(\d{2})[\s\S]*\1/;
+    if (numPattern.test(emailValue) || numPattern.test(passwordValue)) {
+        return alert('같은 숫자 두 자리가 반복되면 안 됩니다. (예: 1212)');
+    }
+
 
     if (!sanitizedEmail) {
         // Sanitize된 비밀번호 사용
