@@ -112,11 +112,13 @@
                 <script type="text/javascript" defer src="js/js_search.js"></script>
                 <script type="text/javascript" defer src="js/js_data_type.js"></script>
                 <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
             </head>
             <body style="background-color: black;" onload="pop_up();">
                 <div style="display: flex; justify-content: center;">
                     <img src = "image/LOGO.png" width = "200" height = "80"  onmouseover="over(this)" onmouseout="out(this)">
                     <!-- <h3 style="font-size: 24px; font-weight: bold; font-style: italic; color: white; font-family: '굴림';"><a href=" https://www.leagueoflegends.com/ko-kr/how-to-play/" target="_blank">게임정보</a>    기본정보    챔피언    패치 노트    새소식 다운로드 (메뉴 작성)</h3> -->
+
                     <nav class="navbar navbar-expand-lg bg-body-tertiary" class= "navbar" style="background-color: #e3f2fd;" data-bs-theme="light">
                         <div class="container-fluid">
                         <a class="navbar-brand" href="#">홈페이지</a>
@@ -167,10 +169,11 @@
                         </div>
                         <a href="login/login.html" class="btn btn-outline-success" id="login_btn">로그인</a>
                     </nav>
+
                 </div>
                 <hr>
                 <div class="container-fluid" style="display: flex; justify-content: center;">
-                    <a href="index.html" target="_blank"><img src="image/MAIN.jpg" class="img-fluid" width ="1500" height="500"></a>
+                    <a href="index.html" target="_blank"><img src="image/MAIN3.jpg" class="img-fluid" width ="1500" height="500"></a>
                 </div>
                 <hr>
                 <div style="display : flex; justify-content: center;">
@@ -211,6 +214,7 @@
                 </div>
             </body>
         </html>
+
 
 </details>
 <details>
@@ -389,7 +393,7 @@
                 </div>
                 <hr>
                 <div class="container-fluid" style="display: flex; justify-content: center;">
-                    <a href="index.html" target="_blank"><img src="image/MAIN.jpg" class="img-fluid" width ="1500" height="500"></a>
+                    <a href="index.html" target="_blank"><img src="image/MAIN3.jpg" class="img-fluid" width ="1500" height="500"></a>
                 </div>
                 <hr>
                 <div style="display : flex; justify-content: center;">
@@ -430,6 +434,7 @@
                 </div>
             </body>
         </html>
+
 
 </details>
 <details>
@@ -958,7 +963,7 @@
                 </div>
                 <hr>
                 <div class="container-fluid" style="display: flex; justify-content: center;">
-                    <a href="index.html" target="_blank"><img src="image/MAIN.jpg" class="img-fluid" width ="1500" height="500"></a>
+                    <a href="index.html" target="_blank"><img src="image/MAIN3.jpg" class="img-fluid" width ="1500" height="500"></a>
                 </div>
                 <hr>
                 <div style="display : flex; justify-content: center;">
@@ -1009,7 +1014,7 @@
             <head>
                 <meta charset="UTF-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1">
-                <title>우왕 곧 종강이다!!!
+                <title>팝업창 확인
                 </title>
                 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
                 <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
@@ -1017,7 +1022,7 @@
             </head>    
             <body onload="show_clock();">
                 <h1>팝업창확인</h1>
-                <h1 class="display-1"><i class="bi bi-alarm"></i> 팝업창 확인<br><br></h1>
+                <h1 class="display-1"><i class="bi bi-alarm"></i> 우왕 곧 종강이당!<br><br></h1>
                 <h1 class="display-4"><div id="divClock" class="clock"></div></h1>
                 <div id="divClock" class="clock">
                 <h1 class="display-4"><div id="Time" class="clock"></div></h1>
