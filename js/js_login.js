@@ -179,5 +179,7 @@ const check_input = () => {
     loginForm.submit();
 };
 
-document.getElementById("login_btn").addEventListener('click', check_input);
-   
+document.addEventListener('DOMContentLoaded', () => {
+    init();
+    document.getElementById("login_btn").addEventListener('click', check_input);
+});   
